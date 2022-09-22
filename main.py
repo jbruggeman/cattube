@@ -4,8 +4,8 @@ import subprocess
 import time
 import random
 
-VIDEO_PLAY_TIME = 60*60
-REST_TIME = 60*60
+VIDEO_PLAY_TIME = 30*60
+REST_TIME = 30*60
 
 FIRST_HOUR = 9
 LAST_HOUR = 22
@@ -40,7 +40,7 @@ def launch_video(video_id, runtime):
 
     time.sleep(runtime)
     print(f"Spawned process {process.pid}")
-    process.kill()
+    process.terminate()
 
 def main_loop(video_ids):
     while True:
@@ -48,10 +48,10 @@ def main_loop(video_ids):
             video = random.choice(video_ids)
             wake_display()
             launch_video(video, VIDEO_PLAY_TIME)
-            sleep_display()
         else:
             print("Too early to watch cat videos")
 
+        sleep_display()
         time.sleep(REST_TIME)
 
 if __name__ == '__main__':
