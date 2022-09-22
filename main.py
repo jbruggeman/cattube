@@ -27,17 +27,17 @@ def is_good_time_for_video():
     return current_time.tm_hour >= FIRST_HOUR and current_time.tm_hour <= LAST_HOUR
 
 def wake_display():
-    subprocess.run(["xset", "-display", ":0", "dpms", "force", "on"])
+    subprocess.run(["xset", "dpms", "force", "on"])
 
 def sleep_display():
-    subprocess.run(["xset", "-display", ":0", "dpms", "force", "on"])
+    subprocess.run(["xset", "dpms", "force", "off"])
 
 def launch_video(video_id, runtime):
     url = f'https://www.youtube.com/embed/{video_id}?autoplay=1'
 
-    #process = subprocess.Popen(["firefox", f'--kiosk={url}'], env={"DISPLAY": ":0"})
-    process = subprocess.Popen(["google-chrome", '--kiosk', url], env={"DISPLAY": ":0"})
-    
+    process = subprocess.Popen(["firefox", f'--kiosk={url}'])
+    #process = subprocess.Popen(["google-chrome", '--kiosk', url], env={"DISPLAY": ":0"})
+
     time.sleep(runtime)
     print(f"Spawned process {process.pid}")
     process.kill()
@@ -47,7 +47,7 @@ def main_loop(video_ids):
         if is_good_time_for_video():
             video = random.choice(video_ids)
             wake_display()
-            launch_video(video_ids[0], VIDEO_PLAY_TIME)
+            launch_video(video, VIDEO_PLAY_TIME)
             sleep_display()
         else:
             print("Too early to watch cat videos")
