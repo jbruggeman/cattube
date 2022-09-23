@@ -69,7 +69,7 @@ def compute_start_point_in_seconds(duration):
     return random.randrange(possible_start_time_range.seconds)
 
 def launch_video(video_id, start_point=0):
-    url = f'https://www.youtube.com/embed/{video_id}?autoplay=1'#&t={start_point}'
+    url = f'https://www.youtube.com/embed/{video_id}?autoplay=1&start={start_point}'
 
     firefox_process_args = [
         "firefox",
@@ -86,12 +86,15 @@ def launch_video(video_id, start_point=0):
     ]
 
     args = firefox_process_args
+    #args = chrome_process_args
 
-    print(f"Spawning process {args}")
+    printable_args = " ".join(args)
+    print(f"Spawning process {printable_args}")
 
-    process = subprocess.Popen(firefox_process_args)
-
+    process = subprocess.Popen(args)
     print(f"Spawned process {process.pid}")
+
+    time.sleep(VIDEO_PLAY_TIME)
     process.terminate()
 
 def main_loop(video_ids):
