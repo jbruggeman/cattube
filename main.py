@@ -55,7 +55,7 @@ def query_video_duration(video_id):
 
     response_json = r.json()
     duration_string = response_json["items"][0]["contentDetails"]["duration"]
-    return isodate.parse_duration(duration_string)    
+    return isodate.parse_duration(duration_string)   
 
 def compute_start_point_in_seconds(duration):
     max_playback_time = timedelta(seconds=VIDEO_PLAY_TIME)
@@ -68,7 +68,16 @@ def compute_start_point_in_seconds(duration):
 
     return random.randrange(possible_start_time_range.seconds)
 
-def launch_video(video_id, start_point=0):
+def launch_video(video_id, video_duration):
+    if video_duration is None:
+        start_point = 0
+        video_play_time = VIDEO_PLAY_TIME
+    else:
+        start_point = compute_start_point_in_seconds(video_duration)
+        video_play_time = min(VIDEO_PLAY_TIME, video_duration.seconds - MAX_DURATION_BUFFER_VALUE)
+        print(f"Will start {video_id} at {start_point}s and play for {video_play_time}s")
+
+
     url = f'https://www.youtube.com/embed/{video_id}?autoplay=1&start={start_point}'
 
     firefox_process_args = [
@@ -94,25 +103,29 @@ def launch_video(video_id, start_point=0):
     process = subprocess.Popen(args)
     print(f"Spawned process {process.pid}")
 
-    time.sleep(VIDEO_PLAY_TIME)
+    time.sleep(video_play_time)
     process.terminate()
+
+def play_next_video_loop():
+    if is_good_time_for_video():
+        video_id = random.choice(video_ids)
+        video_duration = query_video_duration(video_id)
+        print(f"Video {video_id} has duration {video_duration}")
+        wake_display()
+        launch_video(video_id, video_duration)
+    else:
+        print("Too early to watch cat videos")
+
+    sleep_display()
+    time.sleep(REST_TIME)
 
 def main_loop(video_ids):
     while True:
-        if is_good_time_for_video():
-            video_id = random.choice(video_ids)
-            video_duration = query_video_duration(video_id)
-            print(f"Video {video_id} has duration {video_duration}")
-            start_point = compute_start_point_in_seconds(video_duration)
-            print(f"Will start {video_id} at {start_point}s")
-            wake_display()
-            launch_video(video_id, start_point)
-            time.sleep(VIDEO_PLAY_TIME)
-        else:
-            print("Too early to watch cat videos")
-
-        sleep_display()
-        time.sleep(REST_TIME)
+        try:
+            play_next_video_loop()
+        except e:
+            print(e)
+            time.sleep(REST_TIME)
 
 if __name__ == '__main__':
     video_ids = load_videos("videos.dat")
