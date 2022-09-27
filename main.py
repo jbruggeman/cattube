@@ -12,8 +12,9 @@ VIDEO_PLAY_TIME = 30*60
 REST_TIME = 30*60
 MAX_DURATION_BUFFER_VALUE = 60
 
-FIRST_HOUR = 9
-LAST_HOUR = 22
+MORNING = 9
+END_OF_CRAZY_TIME = 21
+BED_TIME = 22
 
 with open('keys.json') as f:
   keys = json.load(f)
@@ -35,7 +36,12 @@ def load_videos(videos_file):
 def is_good_time_for_video():
     current_time = time.localtime()
 
-    return current_time.tm_hour >= FIRST_HOUR and current_time.tm_hour <= LAST_HOUR
+    return current_time.tm_hour >= MORNING and current_time.tm_hour <= END_OF_CRAZY_TIME
+
+def is_good_time_for_night_time_video():
+    current_time = time.localtime()
+
+    return current_time.tm_hour >= END_OF_CRAZY_TIME and current_time.tm_hour <= BED_TIME
 
 def wake_display():
     subprocess.run(["xset", "dpms", "force", "on"])
@@ -107,7 +113,15 @@ def launch_video(video_id, video_duration):
     process.terminate()
 
 def play_next_video_loop():
+    video_ids = None
     if is_good_time_for_video():
+        print("Lets find a good cat video...")
+        video_ids = load_videos("videos.dat")
+    elif is_good_time_for_night_time_video():
+        print("Lets find a good night time cat video...")
+        video_ids = load_videos("night_time.dat")
+    
+    if video_ids is not None:
         video_id = random.choice(video_ids)
         video_duration = query_video_duration(video_id)
         print(f"Video {video_id} has duration {video_duration}")
@@ -119,14 +133,13 @@ def play_next_video_loop():
     sleep_display()
     time.sleep(REST_TIME)
 
-def main_loop(video_ids):
+def main_loop():
     while True:
         try:
             play_next_video_loop()
-        except e:
-            print(e)
+        except BaseException as e:
+            print(f"Exception! {e}")
             time.sleep(REST_TIME)
 
 if __name__ == '__main__':
-    video_ids = load_videos("videos.dat")
-    main_loop(video_ids)
+    main_loop()
