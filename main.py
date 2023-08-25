@@ -27,9 +27,11 @@ def load_videos(videos_file):
         line = fp.readline()
         while line:
             line = line.strip()
+
             if not line.startswith("#") and len(line) > 0:
                 video_ids.append(line[32:])
-                line = fp.readline()
+
+            line = fp.readline()
 
     return video_ids
 
