@@ -46,10 +46,10 @@ def is_good_time_for_night_time_video():
     return current_time.tm_hour >= END_OF_CRAZY_TIME and current_time.tm_hour <= BED_TIME
 
 def wake_display():
-    subprocess.run(["xset", "dpms", "force", "on"])
+    subprocess.run(["wlr-randr", "--output", "HDMI-A-1", "--on"])
 
 def sleep_display():
-    subprocess.run(["xset", "dpms", "force", "off"])
+    subprocess.run(["wlr-randr", "--output", "HDMI-A-1", "--off"])
 
 def query_video_duration(video_id):
     url = f"https://www.googleapis.com/youtube/v3/videos?id={video_id}&part=contentDetails&key={YOUTUBE_API_KEY}"
